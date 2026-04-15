@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-off-white dark:bg-neutral-950 text-neutral-800 dark:text-neutral-100;
+    overscroll-behavior: none;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: 'Bachelorette', 'Playfair Display', Georgia, serif;
+  }
+
+  .font-title {
+    font-family: 'Bachelorette', 'Playfair Display', Georgia, serif;
+  }
+
+  .font-body {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #D8C3B6;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #BFA6A0;
+  }
+}
+
+@layer utilities {
+  .safe-area-inset-bottom {
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}
