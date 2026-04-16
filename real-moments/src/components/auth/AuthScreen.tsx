@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { v4 as uuid } from 'uuid'
+import { Eye, EyeOff } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
+import { isStorageAvailable } from '../../utils/storage'
 
 export const AuthScreen = () => {
   const { state, dispatch } = useApp()
@@ -9,18 +11,26 @@ export const AuthScreen = () => {
   const [role, setRole] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [storageWarning, setStorageWarning] = useState(false)
+
+  useEffect(() => {
+    if (!isStorageAvailable()) setStorageWarning(true)
+  }, [])
+
+  const normalizeEmail = (e: string) => e.trim().toLowerCase()
 
   const handleLogin = () => {
-    const user = state.users.find(u => u.email === email && u.password === password)
+    const user = state.users.find(u => u.email === normalizeEmail(email) && u.password === password)
     if (!user) { setError('Email o contraseña incorrectos'); return }
     dispatch({ type: 'LOGIN', user })
   }
 
   const handleRegister = () => {
     if (!name || !email || !password) { setError('Completa todos los campos'); return }
-    if (state.users.find(u => u.email === email)) { setError('Este email ya está registrado'); return }
-    dispatch({ type: 'REGISTER', user: { id: uuid(), name, role, email, password } })
+    if (state.users.find(u => u.email === normalizeEmail(email))) { setError('Este email ya está registrado'); return }
+    dispatch({ type: 'REGISTER', user: { id: uuid(), name, role, email: normalizeEmail(email), password } })
   }
 
   return (
@@ -35,6 +45,12 @@ export const AuthScreen = () => {
           {mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
         </h2>
 
+        {storageWarning && (
+          <p className="text-amber-600 text-xs text-center mb-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl p-2">
+            Tu navegador no permite guardar datos. Los datos se perderán al cerrar la pestaña.
+          </p>
+        )}
+
         {error && (
           <p className="text-red-400 text-xs text-center mb-4 bg-red-50 dark:bg-red-900/20 rounded-xl p-2">{error}</p>
         )}
@@ -47,7 +63,11 @@ export const AuthScreen = () => {
             </>
           )}
           <Field label="Email" value={email} onChange={setEmail} placeholder="tu@email.com" type="email" />
-          <Field label="Contraseña" value={password} onChange={setPassword} placeholder="••••••••" type="password" />
+          <Field label="Contraseña" value={password} onChange={setPassword} placeholder="••••••••" type={showPassword ? 'text' : 'password'}>
+            <button type="button" onClick={() => setShowPassword(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-forest transition-colors">
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </Field>
         </div>
 
         <button
@@ -87,16 +107,19 @@ export const AuthScreen = () => {
 }
 
 const Field = ({
-  label, value, onChange, placeholder, type = 'text',
-}: { label: string; value: string; onChange: (v: string) => void; placeholder: string; type?: string }) => (
+  label, value, onChange, placeholder, type = 'text', children,
+}: { label: string; value: string; onChange: (v: string) => void; placeholder: string; type?: string; children?: React.ReactNode }) => (
   <div>
     <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 block mb-1">{label}</label>
-    <input
-      type={type}
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full border border-gray-200 dark:border-neutral-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200 placeholder-neutral-300 focus:outline-none focus:border-sage transition-colors"
-    />
+    <div className="relative">
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full border border-gray-200 dark:border-neutral-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200 placeholder-neutral-300 focus:outline-none focus:border-sage transition-colors pr-9"
+      />
+      {children}
+    </div>
   </div>
 )
