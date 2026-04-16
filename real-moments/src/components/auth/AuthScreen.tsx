@@ -1,11 +1,18 @@
-import { useState, useEffect } from 'react'
-import { v4 as uuid } from 'uuid'
+import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
-import { useApp } from '../../context/AppContext'
-import { isStorageAvailable } from '../../utils/storage'
+import { supabase } from '../../lib/supabase'
+
+const AUTH_ERRORS: Record<string, string> = {
+  'Invalid login credentials': 'Email o contraseña incorrectos',
+  'Email not confirmed': 'Debes confirmar tu email primero',
+  'User already registered': 'Este email ya está registrado',
+  'Password should be at least 6 characters': 'La contraseña debe tener al menos 6 caracteres',
+}
+
+const toSpanish = (msg: string) =>
+  Object.entries(AUTH_ERRORS).find(([k]) => msg.includes(k))?.[1] ?? msg
 
 export const AuthScreen = () => {
-  const { state, dispatch } = useApp()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [name, setName] = useState('')
   const [role, setRole] = useState('')
@@ -13,25 +20,33 @@ export const AuthScreen = () => {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
-  const [storageWarning, setStorageWarning] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => {
-    if (!isStorageAvailable()) setStorageWarning(true)
-  }, [])
-
-  const normalizeEmail = (e: string) => e.trim().toLowerCase()
-
-  const handleLogin = () => {
-    const user = state.users.find(u => u.email === normalizeEmail(email) && u.password === password)
-    if (!user) { setError('Email o contraseña incorrectos'); return }
-    dispatch({ type: 'LOGIN', user })
+  const handleLogin = async () => {
+    setError('')
+    setSubmitting(true)
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    })
+    if (err) setError(toSpanish(err.message))
+    setSubmitting(false)
   }
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!name || !email || !password) { setError('Completa todos los campos'); return }
-    if (state.users.find(u => u.email === normalizeEmail(email))) { setError('Este email ya está registrado'); return }
-    dispatch({ type: 'REGISTER', user: { id: uuid(), name, role, email: normalizeEmail(email), password } })
+    setError('')
+    setSubmitting(true)
+    const { error: err } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: { data: { name, role } },
+    })
+    if (err) setError(toSpanish(err.message))
+    setSubmitting(false)
   }
+
+  const switchMode = () => { setMode(m => m === 'login' ? 'register' : 'login'); setError('') }
 
   return (
     <div className="min-h-screen bg-off-white dark:bg-neutral-950 flex flex-col items-center justify-center px-6">
@@ -45,12 +60,6 @@ export const AuthScreen = () => {
           {mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
         </h2>
 
-        {storageWarning && (
-          <p className="text-amber-600 text-xs text-center mb-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl p-2">
-            Tu navegador no permite guardar datos. Los datos se perderán al cerrar la pestaña.
-          </p>
-        )}
-
         {error && (
           <p className="text-red-400 text-xs text-center mb-4 bg-red-50 dark:bg-red-900/20 rounded-xl p-2">{error}</p>
         )}
@@ -58,13 +67,17 @@ export const AuthScreen = () => {
         <div className="space-y-3">
           {mode === 'register' && (
             <>
-              <Field label="Nombre completo" value={name} onChange={setName} placeholder="Daniela Real" />
-              <Field label="Cargo / Rol (opcional)" value={role} onChange={setRole} placeholder="Real Moments CEO" />
+              <Field label="Nombre completo" value={name} onChange={setName} placeholder="Daniela Real" autoComplete="name" />
+              <Field label="Cargo / Rol (opcional)" value={role} onChange={setRole} placeholder="Real Moments CEO" autoComplete="organization-title" />
             </>
           )}
-          <Field label="Email" value={email} onChange={setEmail} placeholder="tu@email.com" type="email" />
-          <Field label="Contraseña" value={password} onChange={setPassword} placeholder="••••••••" type={showPassword ? 'text' : 'password'}>
-            <button type="button" onClick={() => setShowPassword(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-forest transition-colors">
+          <Field label="Email" value={email} onChange={setEmail} placeholder="tu@email.com" type="email" autoComplete="email" />
+          <Field label="Contraseña" value={password} onChange={setPassword} placeholder="••••••••"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+          >
+            <button type="button" onClick={() => setShowPassword(s => !s)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-forest transition-colors">
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </Field>
@@ -72,43 +85,34 @@ export const AuthScreen = () => {
 
         <button
           onClick={mode === 'login' ? handleLogin : handleRegister}
-          className="mt-6 w-full bg-forest hover:bg-sage transition-colors text-white font-body text-sm py-3 rounded-2xl"
+          disabled={submitting}
+          className="mt-6 w-full bg-forest hover:bg-sage disabled:opacity-50 transition-colors text-white font-body text-sm py-3 rounded-2xl"
         >
-          {mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
+          {submitting ? '...' : mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
         </button>
 
         <p className="text-center text-xs text-neutral-400 mt-4">
           {mode === 'login' ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}{' '}
-          <button
-            onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError('') }}
-            className="text-forest dark:text-sage underline underline-offset-2"
-          >
+          <button onClick={switchMode} className="text-forest dark:text-sage underline underline-offset-2">
             {mode === 'login' ? 'Regístrate' : 'Inicia sesión'}
           </button>
         </p>
-
-        {mode === 'login' && state.users.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-neutral-800">
-            <p className="text-[10px] text-neutral-400 text-center mb-2">Acceso rápido (demo)</p>
-            {state.users.map(u => (
-              <button
-                key={u.id}
-                onClick={() => dispatch({ type: 'LOGIN', user: u })}
-                className="w-full text-xs text-forest dark:text-sage text-left px-3 py-2 hover:bg-off-white dark:hover:bg-neutral-800 rounded-xl transition-colors"
-              >
-                {u.name} · {u.email}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )
 }
 
 const Field = ({
-  label, value, onChange, placeholder, type = 'text', children,
-}: { label: string; value: string; onChange: (v: string) => void; placeholder: string; type?: string; children?: React.ReactNode }) => (
+  label, value, onChange, placeholder, type = 'text', autoComplete, children,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  placeholder: string
+  type?: string
+  autoComplete?: string
+  children?: React.ReactNode
+}) => (
   <div>
     <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 block mb-1">{label}</label>
     <div className="relative">
@@ -117,6 +121,7 @@ const Field = ({
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
+        autoComplete={autoComplete}
         className="w-full border border-gray-200 dark:border-neutral-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200 placeholder-neutral-300 focus:outline-none focus:border-sage transition-colors pr-9"
       />
       {children}

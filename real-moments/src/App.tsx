@@ -9,7 +9,13 @@ import { InventoryTab } from './components/inventory/InventoryTab'
 const TABS = [Dashboard, MontajesTab, FinancialTab, InventoryTab]
 
 export const App = () => {
-  const { state } = useApp()
+  const { state, loading } = useApp()
+
+  if (loading) return (
+    <div className="min-h-screen bg-off-white dark:bg-neutral-950 flex items-center justify-center">
+      <p className="font-title text-2xl text-forest dark:text-sage animate-pulse">Real Moments</p>
+    </div>
+  )
 
   if (!state.currentUser) return <AuthScreen />
 
