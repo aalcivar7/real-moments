@@ -53,6 +53,7 @@ export const AuthScreen = () => {
       <div className="mb-8 text-center">
         <h1 className="font-title text-4xl text-forest dark:text-sage tracking-wide">Real Moments</h1>
         <p className="text-sm text-neutral-400 mt-1">Gestión de montajes para eventos</p>
+        <p className="text-xs text-neutral-300 mt-0.5">v2</p>
       </div>
 
       <div className="w-full max-w-sm bg-white dark:bg-neutral-900 rounded-3xl shadow-sm border border-gray-100 dark:border-neutral-800 p-8">
