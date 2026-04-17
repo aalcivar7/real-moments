@@ -312,21 +312,27 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Auth listener — fires on page load and on login/logout
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session) {
-        const [data, userRes] = await Promise.all([fetchAllData(), supabase.auth.getUser()])
-        const meta = userRes.data.user?.user_metadata ?? {}
-        const currentUser: User = {
-          id: session.user.id,
-          name: (meta.name as string) ?? '',
-          role: (meta.role as string) ?? '',
-          email: session.user.email ?? '',
-          password: '',
+      try {
+        if (session) {
+          const [data, userRes] = await Promise.all([fetchAllData(), supabase.auth.getUser()])
+          const meta = userRes.data.user?.user_metadata ?? {}
+          const currentUser: User = {
+            id: session.user.id,
+            name: (meta.name as string) ?? '',
+            role: (meta.role as string) ?? '',
+            email: session.user.email ?? '',
+            password: '',
+          }
+          rawDispatch({ type: 'INIT', payload: { ...data, currentUser } })
+        } else {
+          rawDispatch({ type: 'LOGOUT' })
         }
-        rawDispatch({ type: 'INIT', payload: { ...data, currentUser } })
-      } else {
-        rawDispatch({ type: 'LOGOUT' })
+      } catch (err) {
+        console.error('Auth state change error:', err)
+        setSyncError(`Error al cargar datos: ${err instanceof Error ? err.message : String(err)}`)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     })
     return () => subscription.unsubscribe()
   }, [])
