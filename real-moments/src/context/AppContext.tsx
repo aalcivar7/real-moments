@@ -91,6 +91,11 @@ const fetchAllData = async (): Promise<Partial<AppState>> => {
 
 // ─── supabase sync ────────────────────────────────────────────────────────────
 
+const sb = async (p: PromiseLike<{ error: { message: string } | null }>) => {
+  const { error } = await p
+  if (error) throw new Error(error.message)
+}
+
 const syncToSupabase = async (action: Action, state: AppState): Promise<void> => {
   switch (action.type) {
     case 'ADD_MONTAJE': {
@@ -99,9 +104,9 @@ const syncToSupabase = async (action: Action, state: AppState): Promise<void> =>
       const ingresoTotal = calcIngresos(m)
       const gananciaNeta = ingresoTotal - (m.costosMontaje ?? 0)
       const idMontaje = generateMontajeId(m.cliente, m.fecha, m.paquete)
-      await supabase.from('montajes').insert(
+      await sb(supabase.from('montajes').insert(
         objToRow({ ...m, id, idMontaje, ingresoTotal, gananciaNeta }, ['n'])
-      )
+      ))
       break
     }
     case 'UPDATE_MONTAJE': {
@@ -109,70 +114,70 @@ const syncToSupabase = async (action: Action, state: AppState): Promise<void> =>
       const ingresoTotal = calcIngresos(m)
       const gananciaNeta = ingresoTotal - (m.costosMontaje ?? 0)
       const idMontaje = generateMontajeId(m.cliente, m.fecha, m.paquete)
-      await supabase.from('montajes')
+      await sb(supabase.from('montajes')
         .update(objToRow({ ...m, idMontaje, ingresoTotal, gananciaNeta }, ['id', 'n']))
-        .eq('id', m.id)
+        .eq('id', m.id))
       break
     }
     case 'DELETE_MONTAJE':
-      await supabase.from('montajes').delete().eq('id', action.id)
+      await sb(supabase.from('montajes').delete().eq('id', action.id))
       break
 
     case 'ADD_PACKAGE':
-      await supabase.from('packages').insert(objToRow({ ...action.pkg, id: action._id! }))
+      await sb(supabase.from('packages').insert(objToRow({ ...action.pkg, id: action._id! })))
       break
     case 'UPDATE_PACKAGE':
-      await supabase.from('packages').update(objToRow(action.pkg as unknown as Row, ['id'])).eq('id', action.pkg.id)
+      await sb(supabase.from('packages').update(objToRow(action.pkg as unknown as Row, ['id'])).eq('id', action.pkg.id))
       break
     case 'DELETE_PACKAGE':
-      await supabase.from('packages').delete().eq('id', action.id)
+      await sb(supabase.from('packages').delete().eq('id', action.id))
       break
 
     case 'ADD_INVENTORY_ITEM':
-      await supabase.from('inventory_items').insert(objToRow({ ...action.item, id: action._id! }))
+      await sb(supabase.from('inventory_items').insert(objToRow({ ...action.item, id: action._id! })))
       break
     case 'UPDATE_INVENTORY_ITEM':
-      await supabase.from('inventory_items').update(objToRow(action.item as unknown as Row, ['id'])).eq('id', action.item.id)
+      await sb(supabase.from('inventory_items').update(objToRow(action.item as unknown as Row, ['id'])).eq('id', action.item.id))
       break
     case 'DELETE_INVENTORY_ITEM':
-      await supabase.from('inventory_items').delete().eq('id', action.id)
+      await sb(supabase.from('inventory_items').delete().eq('id', action.id))
       break
 
     case 'ADD_INVENTORY_MOVEMENT':
-      await supabase.from('inventory_movements').insert(objToRow({ ...action.movement, id: action._id! }))
+      await sb(supabase.from('inventory_movements').insert(objToRow({ ...action.movement, id: action._id! })))
       break
     case 'DELETE_INVENTORY_MOVEMENT':
-      await supabase.from('inventory_movements').delete().eq('id', action.id)
+      await sb(supabase.from('inventory_movements').delete().eq('id', action.id))
       break
 
     case 'ADD_SUPPLIER':
-      await supabase.from('suppliers').insert(objToRow({ ...action.supplier, id: action._id! }))
+      await sb(supabase.from('suppliers').insert(objToRow({ ...action.supplier, id: action._id! })))
       break
     case 'UPDATE_SUPPLIER':
-      await supabase.from('suppliers').update(objToRow(action.supplier as unknown as Row, ['id'])).eq('id', action.supplier.id)
+      await sb(supabase.from('suppliers').update(objToRow(action.supplier as unknown as Row, ['id'])).eq('id', action.supplier.id))
       break
     case 'DELETE_SUPPLIER':
-      await supabase.from('suppliers').delete().eq('id', action.id)
+      await sb(supabase.from('suppliers').delete().eq('id', action.id))
       break
 
     case 'ADD_EVENT_TYPE':
-      await supabase.from('app_settings').upsert({ id: 1, event_types: [...state.eventTypes, action.value] })
+      await sb(supabase.from('app_settings').upsert({ id: 1, event_types: [...state.eventTypes, action.value] }))
       break
     case 'REMOVE_EVENT_TYPE':
-      await supabase.from('app_settings').upsert({ id: 1, event_types: state.eventTypes.filter(e => e !== action.value) })
+      await sb(supabase.from('app_settings').upsert({ id: 1, event_types: state.eventTypes.filter(e => e !== action.value) }))
       break
     case 'UPDATE_EVENT_TYPE':
-      await supabase.from('app_settings').upsert({ id: 1, event_types: state.eventTypes.map(e => e === action.old ? action.updated : e) })
+      await sb(supabase.from('app_settings').upsert({ id: 1, event_types: state.eventTypes.map(e => e === action.old ? action.updated : e) }))
       break
 
     case 'ADD_PAYMENT_STATUS':
-      await supabase.from('app_settings').upsert({ id: 1, payment_statuses: [...state.paymentStatuses, action.value] })
+      await sb(supabase.from('app_settings').upsert({ id: 1, payment_statuses: [...state.paymentStatuses, action.value] }))
       break
     case 'REMOVE_PAYMENT_STATUS':
-      await supabase.from('app_settings').upsert({ id: 1, payment_statuses: state.paymentStatuses.filter(s => s !== action.value) })
+      await sb(supabase.from('app_settings').upsert({ id: 1, payment_statuses: state.paymentStatuses.filter(s => s !== action.value) }))
       break
     case 'UPDATE_PAYMENT_STATUS':
-      await supabase.from('app_settings').upsert({ id: 1, payment_statuses: state.paymentStatuses.map(s => s === action.old ? action.updated : s) })
+      await sb(supabase.from('app_settings').upsert({ id: 1, payment_statuses: state.paymentStatuses.map(s => s === action.old ? action.updated : s) }))
       break
 
     case 'UPDATE_PROFILE':
