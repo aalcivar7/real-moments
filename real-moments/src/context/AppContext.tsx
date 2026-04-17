@@ -97,6 +97,7 @@ const sb = async (p: PromiseLike<{ error: { message: string } | null }>) => {
 }
 
 const syncToSupabase = async (action: Action, state: AppState): Promise<void> => {
+  const uid = state.currentUser?.id
   switch (action.type) {
     case 'ADD_MONTAJE': {
       const id = action._id!
@@ -105,7 +106,7 @@ const syncToSupabase = async (action: Action, state: AppState): Promise<void> =>
       const gananciaNeta = ingresoTotal - (m.costosMontaje ?? 0)
       const idMontaje = generateMontajeId(m.cliente, m.fecha, m.paquete)
       await sb(supabase.from('montajes').insert(
-        objToRow({ ...m, id, idMontaje, ingresoTotal, gananciaNeta }, ['n'])
+        objToRow({ ...m, id, idMontaje, ingresoTotal, gananciaNeta, userId: uid }, ['n'])
       ))
       break
     }
@@ -124,7 +125,7 @@ const syncToSupabase = async (action: Action, state: AppState): Promise<void> =>
       break
 
     case 'ADD_PACKAGE':
-      await sb(supabase.from('packages').insert(objToRow({ ...action.pkg, id: action._id! })))
+      await sb(supabase.from('packages').insert(objToRow({ ...action.pkg, id: action._id!, userId: uid })))
       break
     case 'UPDATE_PACKAGE':
       await sb(supabase.from('packages').update(objToRow(action.pkg as unknown as Row, ['id'])).eq('id', action.pkg.id))
@@ -134,7 +135,7 @@ const syncToSupabase = async (action: Action, state: AppState): Promise<void> =>
       break
 
     case 'ADD_INVENTORY_ITEM':
-      await sb(supabase.from('inventory_items').insert(objToRow({ ...action.item, id: action._id! })))
+      await sb(supabase.from('inventory_items').insert(objToRow({ ...action.item, id: action._id!, userId: uid })))
       break
     case 'UPDATE_INVENTORY_ITEM':
       await sb(supabase.from('inventory_items').update(objToRow(action.item as unknown as Row, ['id'])).eq('id', action.item.id))
@@ -144,14 +145,14 @@ const syncToSupabase = async (action: Action, state: AppState): Promise<void> =>
       break
 
     case 'ADD_INVENTORY_MOVEMENT':
-      await sb(supabase.from('inventory_movements').insert(objToRow({ ...action.movement, id: action._id! })))
+      await sb(supabase.from('inventory_movements').insert(objToRow({ ...action.movement, id: action._id!, userId: uid })))
       break
     case 'DELETE_INVENTORY_MOVEMENT':
       await sb(supabase.from('inventory_movements').delete().eq('id', action.id))
       break
 
     case 'ADD_SUPPLIER':
-      await sb(supabase.from('suppliers').insert(objToRow({ ...action.supplier, id: action._id! })))
+      await sb(supabase.from('suppliers').insert(objToRow({ ...action.supplier, id: action._id!, userId: uid })))
       break
     case 'UPDATE_SUPPLIER':
       await sb(supabase.from('suppliers').update(objToRow(action.supplier as unknown as Row, ['id'])).eq('id', action.supplier.id))
