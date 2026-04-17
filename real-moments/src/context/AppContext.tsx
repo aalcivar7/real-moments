@@ -275,6 +275,8 @@ const reducer = (state: AppState, action: Action): AppState => {
 type AppContextValue = {
   state: AppState
   loading: boolean
+  syncError: string | null
+  clearSyncError: () => void
   dispatch: (action: Action) => void
 }
 
@@ -283,6 +285,7 @@ const AppContext = createContext<AppContextValue | null>(null)
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [state, rawDispatch] = useReducer(reducer, initialState)
   const [loading, setLoading] = useState(true)
+  const [syncError, setSyncError] = useState<string | null>(null)
   const stateRef = useRef(state)
   useEffect(() => { stateRef.current = state }, [state])
 
@@ -327,10 +330,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
     })()
     rawDispatch(enriched)
-    syncToSupabase(enriched, stateRef.current).catch(console.error)
+    syncToSupabase(enriched, stateRef.current).catch((err: unknown) => {
+      console.error('Supabase sync error:', err)
+      const msg = err instanceof Error ? err.message : String(err)
+      setSyncError(`Error al guardar: ${msg}`)
+    })
   }, [])
 
-  return <AppContext.Provider value={{ state, loading, dispatch }}>{children}</AppContext.Provider>
+  const clearSyncError = useCallback(() => setSyncError(null), [])
+
+  return (
+    <AppContext.Provider value={{ state, loading, syncError, clearSyncError, dispatch }}>
+      {children}
+    </AppContext.Provider>
+  )
 }
 
 export const useApp = () => {
