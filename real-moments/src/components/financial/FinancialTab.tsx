@@ -294,7 +294,7 @@ export const FinancialTab = () => {
   return (
     <div className="pb-20 px-4 pt-5">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="font-title text-2xl text-neutral-800 dark:text-neutral-100">Finanzas de Real Moments</h1>
+        <h1 className="font-gellatio text-2xl text-neutral-800 dark:text-neutral-100">Finanzas de Real Moments</h1>
         <button onClick={() => setMenuOpen(true)} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors">
           <Menu size={20} className="text-neutral-500" />
         </button>

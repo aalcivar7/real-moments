@@ -12,7 +12,6 @@ const PAGE_SIZE = 10
 type Column = { key: keyof Montaje; label: string; type?: 'text' | 'currency' | 'number' }
 
 const COLUMNS: Column[] = [
-  { key: 'idMontaje', label: 'ID Montaje' },
   { key: 'n', label: 'N', type: 'number' },
   { key: 'cliente', label: 'Cliente' },
   { key: 'telefono', label: 'Teléfono' },
@@ -86,7 +85,7 @@ export const MontajesTab = () => {
 
   return (
     <div className="pb-20 px-4 pt-5">
-      <h1 className="font-title text-2xl text-neutral-800 dark:text-neutral-100 mb-4">Montajes</h1>
+      <h1 className="font-gellatio text-2xl text-neutral-800 dark:text-neutral-100 mb-4">Montajes</h1>
 
       <div className="flex items-center justify-between mb-3">
         <p className="font-title text-sm text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Overview</p>
@@ -100,7 +99,6 @@ export const MontajesTab = () => {
             onClick={() => setEditing(m)}
             className="bg-white dark:bg-neutral-800 rounded-2xl border border-gray-100 dark:border-neutral-700 p-3 text-left hover:border-sage transition-colors active:scale-98"
           >
-            <p className="text-[10px] font-semibold text-neutral-400 mb-0.5">{m.idMontaje}</p>
             <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-200 truncate">{m.cliente}</p>
             <p className="text-[10px] text-neutral-400 mt-0.5 truncate">{formatLongDate(m.fecha)}</p>
             <div className="flex gap-1 mt-1.5 flex-wrap">
@@ -118,9 +116,9 @@ export const MontajesTab = () => {
       <div className="overflow-x-auto rounded-2xl border border-gray-100 dark:border-neutral-700 bg-white dark:bg-neutral-800">
         <table className="min-w-full text-xs">
           <thead>
-            <tr className="bg-off-white dark:bg-neutral-900">
+            <tr style={{ backgroundColor: '#BFA6A0' }}>
               {COLUMNS.map(col => (
-                <th key={col.key} className="px-3 py-2.5 text-left font-semibold text-neutral-500 dark:text-neutral-400 whitespace-nowrap relative">
+                <th key={col.key} className="px-3 py-2.5 text-left font-bold text-white whitespace-nowrap relative">
                   <div className="flex items-center gap-1">
                     <span>{col.label}</span>
                     <button onClick={() => { setFilterOpen(filterOpen === col.key ? null : col.key); setFilterInput(filters[col.key] ?? '') }} className="text-neutral-300 hover:text-forest transition-colors">
@@ -151,7 +149,7 @@ export const MontajesTab = () => {
             {displayed.map(m => (
               <tr
                 key={m.id}
-                className="border-t border-gray-50 dark:border-neutral-700 hover:bg-pale-pink/10 dark:hover:bg-neutral-700/30 transition-colors cursor-pointer"
+                className="bg-white dark:bg-neutral-800 border-t border-gray-100 dark:border-neutral-700 hover:bg-pale-pink/10 dark:hover:bg-neutral-700/30 transition-colors cursor-pointer"
                 onClick={() => setEditing(m)}
               >
                 {COLUMNS.map(col => (

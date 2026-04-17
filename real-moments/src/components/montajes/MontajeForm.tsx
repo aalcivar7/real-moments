@@ -35,7 +35,6 @@ export const MontajeForm = ({ initial, onClose }: Props) => {
     set('paquete', pkgName)
     if (pkg) {
       set('itemsIncluidos', pkg.itemsIncluidos)
-      set('precioPaquete', pkg.precio)
     }
   }
 
@@ -94,7 +93,7 @@ export const MontajeForm = ({ initial, onClose }: Props) => {
           <F label="Paquete">
             <select className={inp} value={form.paquete} onChange={e => handlePackageSelect(e.target.value)}>
               <option value="">Seleccionar...</option>
-              {packages.map(p => <option key={p.id} value={p.paquete}>{p.paquete} — {formatCurrency(p.precio)}</option>)}
+              {packages.map(p => <option key={p.id} value={p.paquete}>{p.paquete}{p.precio ? ` — ${p.precio}` : ''}</option>)}
             </select>
           </F>
 
@@ -146,7 +145,7 @@ export const MontajeForm = ({ initial, onClose }: Props) => {
           </F>
 
           <F label="Concepto"><input className={inp} value={form.concepto} onChange={e => set('concepto', e.target.value)} /></F>
-          <F label="Cantidad de personas"><input type="number" className={inp} value={form.cantidadPersonas || ''} onChange={e => set('cantidadPersonas', parseInt(e.target.value) || 0)} /></F>
+          <F label="Cantidad de personas"><input type="text" className={inp} value={form.cantidadPersonas || ''} onChange={e => set('cantidadPersonas', parseInt(e.target.value) || 0)} /></F>
           <F label="Precio del paquete ($)"><input type="number" className={inp} value={form.precioPaquete || ''} onChange={e => set('precioPaquete', parseFloat(e.target.value) || 0)} /></F>
           <F label="Precio montaje y desmontaje ($)"><input type="number" className={inp} value={form.precioMontajeDesmontaje || ''} onChange={e => set('precioMontajeDesmontaje', parseFloat(e.target.value) || 0)} /></F>
           <F label="Información de pagos"><input className={inp} value={form.informacionPagos} onChange={e => set('informacionPagos', e.target.value)} /></F>
@@ -232,4 +231,4 @@ const F = ({ label, children, required = false }: { label: string; children: Rea
   </div>
 )
 
-const formatCurrency = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+const formatCurrency = (n: number) => `$${Math.round(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`

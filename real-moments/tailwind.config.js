@@ -15,6 +15,7 @@ export default {
       fontFamily: {
         title: ['Bachelorette', 'Playfair Display', 'Georgia', 'serif'],
         body: ['Arial', 'Helvetica', 'sans-serif'],
+        gellatio: ['Gellatio', 'Georgia', 'serif'],
       },
     },
   },

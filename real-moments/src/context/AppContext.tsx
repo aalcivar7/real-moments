@@ -40,6 +40,7 @@ type Action =
   | { type: 'ADD_PAYMENT_STATUS'; value: string }
   | { type: 'REMOVE_PAYMENT_STATUS'; value: string }
   | { type: 'UPDATE_PAYMENT_STATUS'; old: string; updated: string }
+  | { type: 'UPDATE_PROFILE'; name: string; role: string }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -174,6 +175,10 @@ const syncToSupabase = async (action: Action, state: AppState): Promise<void> =>
       await supabase.from('app_settings').upsert({ id: 1, payment_statuses: state.paymentStatuses.map(s => s === action.old ? action.updated : s) })
       break
 
+    case 'UPDATE_PROFILE':
+      await supabase.auth.updateUser({ data: { name: action.name, role: action.role } })
+      break
+
     case 'LOGOUT':
       await supabase.auth.signOut()
       break
@@ -264,6 +269,9 @@ const reducer = (state: AppState, action: Action): AppState => {
       return { ...state, paymentStatuses: state.paymentStatuses.filter(s => s !== action.value) }
     case 'UPDATE_PAYMENT_STATUS':
       return { ...state, paymentStatuses: state.paymentStatuses.map(s => s === action.old ? action.updated : s) }
+
+    case 'UPDATE_PROFILE':
+      return { ...state, currentUser: state.currentUser ? { ...state.currentUser, name: action.name, role: action.role } : null }
 
     default:
       return state

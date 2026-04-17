@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Menu, CalendarDays, TrendingUp, TrendingDown, Package, Clock, Heart, MapPin, Star } from 'lucide-react'
+import { Menu, CalendarDays, TrendingUp, TrendingDown, Clock, MapPin, Star, Heart } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { useApp } from '../../context/AppContext'
 import { MenuDrawer } from '../layout/MenuDrawer'
@@ -48,7 +48,7 @@ export const Dashboard = () => {
     { label: 'Calendario', icon: CalendarDays, clickable: true, type: 'calendar' as const },
     { label: 'Ingresos\nmensuales', icon: TrendingUp, clickable: false, value: ingresosMes },
     { label: 'Gastos\nmensuales', icon: TrendingDown, clickable: false, value: gastosMes },
-    { label: 'Paquetes', icon: Package, clickable: true, type: 'packages' as const },
+    { label: 'Paquetes', icon: null, clickable: true, type: 'packages' as const },
   ]
 
   const RADIUS = 112
@@ -57,7 +57,7 @@ export const Dashboard = () => {
   return (
     <div className="pb-20">
       <div className="flex items-center justify-between px-5 pt-5 pb-2">
-        <h1 className="font-title text-2xl text-forest dark:text-sage">Real Moments</h1>
+        <img src="/logo-rm.png" alt="Real Moments" className="h-10 dark:invert" />
         <button onClick={() => setModal('menu')} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors">
           <Menu size={20} className="text-neutral-500" />
         </button>
@@ -65,10 +65,10 @@ export const Dashboard = () => {
 
       <div className="relative mx-auto" style={{ width: CENTER * 2, height: CENTER * 2 }}>
         <div
-          className="absolute rounded-full bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 shadow-sm flex items-center justify-center"
-          style={{ width: 80, height: 80, left: CENTER - 40, top: CENTER - 40 }}
+          className="absolute rounded-full bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 shadow-sm flex items-center justify-center overflow-hidden"
+          style={{ width: 96, height: 96, left: CENTER - 48, top: CENTER - 48 }}
         >
-          <Heart size={32} strokeWidth={1.2} className="text-pale-pink" />
+          <img src="/heart-rm.png" alt="Heart" className="w-16 h-16 object-contain dark:invert" />
         </div>
 
         {RADIAL_ITEMS.map((item, i) => {
@@ -77,34 +77,50 @@ export const Dashboard = () => {
           const y = CENTER + RADIUS * Math.sin(angle) - 46
           const Icon = item.icon
 
+          if (item.clickable && item.type) {
+            return (
+              <button
+                key={i}
+                onClick={() => setModal(item.type!)}
+                className="absolute w-[104px] h-[92px] flex flex-col items-center justify-center gap-1 transition-all cursor-pointer active:scale-95"
+                style={{ left: x, top: y }}
+              >
+                <div className="w-8 h-8 rounded-full bg-pale-pink/30 flex items-center justify-center">
+                  {item.label === 'Paquetes' ? (
+                    <img src="/icon-packages.png" alt="Paquetes" className="w-4 h-4 object-contain dark:invert" />
+                  ) : Icon ? (
+                    <Icon size={16} strokeWidth={1.5} className="text-forest" />
+                  ) : null}
+                </div>
+                <span className="text-[10px] text-neutral-500 dark:text-neutral-400 text-center leading-tight whitespace-pre-line font-body">
+                  {item.label}
+                </span>
+              </button>
+            )
+          }
+
           return (
-            <button
+            <div
               key={i}
-              disabled={!item.clickable}
-              onClick={() => item.clickable && item.type && setModal(item.type)}
-              className={`absolute w-[104px] h-[92px] rounded-2xl flex flex-col items-center justify-center gap-1 border transition-all ${
-                item.clickable
-                  ? 'bg-white dark:bg-neutral-800 border-gray-100 dark:border-neutral-700 hover:border-sage hover:shadow-sm cursor-pointer active:scale-95'
-                  : 'bg-off-white dark:bg-neutral-900 border-transparent cursor-default'
-              }`}
+              className="absolute w-[104px] h-[92px] rounded-2xl flex flex-col items-center justify-center gap-1 border bg-off-white dark:bg-neutral-900 border-transparent cursor-default"
               style={{ left: x, top: y }}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${item.clickable ? 'bg-pale-pink/30' : 'bg-sage/20'}`}>
-                <Icon size={16} strokeWidth={1.5} className={item.clickable ? 'text-forest' : 'text-sage'} />
+              <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center">
+                {Icon && <Icon size={16} strokeWidth={1.5} className="text-sage" />}
               </div>
               <span className="text-[10px] text-neutral-500 dark:text-neutral-400 text-center leading-tight whitespace-pre-line font-body">
                 {item.label}
               </span>
-              {!item.clickable && item.value !== undefined && (
+              {item.value !== undefined && (
                 <span className="text-xs font-semibold text-forest dark:text-sage">{formatCurrency(item.value)}</span>
               )}
-            </button>
+            </div>
           )
         })}
       </div>
 
       <div className="px-5 space-y-4 mt-2">
-        <p className="font-title text-sm text-neutral-400 uppercase tracking-wider">Dashboard</p>
+        <p className="font-gellatio text-2xl text-neutral-700 dark:text-neutral-200 capitalize">Dashboard</p>
 
         <StatRow
           items={[

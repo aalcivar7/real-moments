@@ -13,7 +13,7 @@ export type Package = {
   categoria: string
   subcategoria: string
   paquete: string
-  precio: number
+  precio: string
   itemsIncluidos: string
 }
 
