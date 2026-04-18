@@ -68,7 +68,7 @@ export const Dashboard = () => {
           className="absolute rounded-full bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 shadow-sm flex items-center justify-center overflow-hidden"
           style={{ width: 96, height: 96, left: CENTER - 48, top: CENTER - 48 }}
         >
-          <img src="/heart-rm.png" alt="Heart" className="w-[86px] h-[86px] object-contain dark:invert" />
+          <img src="/heart-rm.png" alt="Heart" className="w-full h-full object-contain dark:invert scale-110" />
         </div>
 
         {RADIAL_ITEMS.map((item, i) => {
@@ -87,7 +87,7 @@ export const Dashboard = () => {
               >
                 <div className="w-8 h-8 rounded-full bg-pale-pink/30 flex items-center justify-center">
                   {item.label === 'Paquetes' ? (
-                    <img src="/icon-packages-heart.png" alt="Paquetes" className="w-6 h-6 object-contain opacity-60" />
+                    <img src="/icon-packages-heart.png" alt="Paquetes" className="w-8 h-8 object-contain opacity-60 scale-125" />
                   ) : Icon ? (
                     <Icon size={16} strokeWidth={1.5} className="text-forest" />
                   ) : null}
