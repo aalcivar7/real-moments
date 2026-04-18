@@ -85,9 +85,14 @@ export const Dashboard = () => {
                 className="absolute w-[104px] h-[92px] flex flex-col items-center justify-center gap-1 transition-all cursor-pointer active:scale-95"
                 style={{ left: x, top: y }}
               >
-                <div className="w-8 h-8 rounded-full bg-pale-pink/30 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-pale-pink/30 flex items-center justify-center overflow-hidden">
                   {item.label === 'Paquetes' ? (
-                    <img src="/icon-packages-heart.png" alt="Paquetes" className="w-8 h-8 object-contain opacity-60 scale-125" />
+                    <img
+                      src="/icon-packages-heart.png"
+                      alt="Paquetes"
+                      className="w-9 h-9 object-contain scale-150"
+                      style={{ filter: 'brightness(0) saturate(100%) invert(49%) sepia(9%) saturate(485%) hue-rotate(103deg) brightness(93%) contrast(87%)' }}
+                    />
                   ) : Icon ? (
                     <Icon size={16} strokeWidth={1.5} className="text-forest" />
                   ) : null}
