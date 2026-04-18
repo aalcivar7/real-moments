@@ -56,9 +56,9 @@ export const Dashboard = () => {
 
   return (
     <div className="pb-20">
-      <div className="flex items-center justify-between px-5 pt-5 pb-2">
-        <img src="/logo-rm.png" alt="Real Moments" className="h-10 dark:invert" />
-        <button onClick={() => setModal('menu')} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors">
+      <div className="relative flex items-center justify-center px-5 pt-5 pb-2">
+        <img src="/logo-rm.png" alt="Real Moments" className="h-24 object-contain dark:invert" />
+        <button onClick={() => setModal('menu')} className="absolute right-5 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors">
           <Menu size={20} className="text-neutral-500" />
         </button>
       </div>
@@ -68,7 +68,7 @@ export const Dashboard = () => {
           className="absolute rounded-full bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 shadow-sm flex items-center justify-center overflow-hidden"
           style={{ width: 96, height: 96, left: CENTER - 48, top: CENTER - 48 }}
         >
-          <img src="/heart-rm.png" alt="Heart" className="w-16 h-16 object-contain dark:invert" />
+          <img src="/heart-rm.png" alt="Heart" className="w-20 h-20 object-contain dark:invert" />
         </div>
 
         {RADIAL_ITEMS.map((item, i) => {
@@ -87,7 +87,7 @@ export const Dashboard = () => {
               >
                 <div className="w-8 h-8 rounded-full bg-pale-pink/30 flex items-center justify-center">
                   {item.label === 'Paquetes' ? (
-                    <img src="/icon-packages.png" alt="Paquetes" className="w-4 h-4 object-contain dark:invert" />
+                    <img src="/icon-packages-heart.png" alt="Paquetes" className="w-4 h-4 object-contain" style={{ filter: 'brightness(0) saturate(100%) invert(44%) sepia(16%) saturate(480%) hue-rotate(100deg) brightness(90%) contrast(85%)' }} />
                   ) : Icon ? (
                     <Icon size={16} strokeWidth={1.5} className="text-forest" />
                   ) : null}
