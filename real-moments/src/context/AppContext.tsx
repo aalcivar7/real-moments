@@ -78,6 +78,10 @@ const fetchAllData = async (): Promise<Partial<AppState>> => {
     supabase.from('suppliers').select('*'),
     supabase.from('app_settings').select('*').eq('id', 1).maybeSingle(),
   ])
+
+  const errs = [m, p, ii, im, s].map((r, i) => r.error ? `[${['montajes','packages','inventory_items','inventory_movements','suppliers'][i]}] ${r.error.message}` : null).filter(Boolean)
+  if (errs.length) throw new Error(`Error cargando datos: ${errs.join(' | ')}`)
+
   return {
     montajes: renumber((m.data ?? []).map(r => rowToObj(r) as Montaje)),
     packages: (p.data ?? []).map(r => rowToObj(r) as Package),
@@ -91,9 +95,12 @@ const fetchAllData = async (): Promise<Partial<AppState>> => {
 
 // ─── supabase sync ────────────────────────────────────────────────────────────
 
-const sb = async (p: PromiseLike<{ error: { message: string } | null }>) => {
+const sb = async (p: PromiseLike<{ error: { message: string; code?: string; details?: string; hint?: string } | null }>) => {
   const { error } = await p
-  if (error) throw new Error(error.message)
+  if (error) {
+    const detail = [error.message, error.hint, error.details].filter(Boolean).join(' — ')
+    throw new Error(detail)
+  }
 }
 
 const syncToSupabase = async (action: Action, state: AppState): Promise<void> => {
