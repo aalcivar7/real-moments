@@ -321,7 +321,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       try {
         if (session) {
-          const [data, userRes] = await Promise.all([fetchAllData(), supabase.auth.getUser()])
+          // getUser() runs first to ensure the session token is fully propagated
+          // to the PostgREST client before fetchAllData() makes its SELECT queries.
+          const userRes = await supabase.auth.getUser()
+          const data = await fetchAllData()
           const meta = userRes.data.user?.user_metadata ?? {}
           const currentUser: User = {
             id: session.user.id,
